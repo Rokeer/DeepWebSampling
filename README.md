@@ -10,3 +10,5 @@ A. Dasgupta, N. Zhang, and G. Das. Leveraging count information in sampling hidd
 
 WeightedAttributeGraph is present by my friend - Teacher Lian. Unfortunately, he lost his computer and all the program were gone.
 This is the reason I need to implement them by myself. and in the future, i will improve this algorithm as well.
+
+btw, if you want to use them, you need download jung package and jdbc by urself
