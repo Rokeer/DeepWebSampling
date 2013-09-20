@@ -22,17 +22,26 @@ public class Util {
 		
 		Set<String> set = preProInfo.keySet();
 		Iterator<String> itr = set.iterator();
-		String maxAttribute = null;
-		String tmpAttribute = null;
-		double maxRLC = -100.0;
-		double tmpRLC = -100.0;
+		String maxAttribute = "";
+		String tmpAttribute = "";
+		double maxRLC = -10000.0;
+		double tmpRLC = -10000.0;
+
+		System.out.println("allcount :" + allCount);
 		while (itr.hasNext()) {
 			tmpAttribute = itr.next();
-			tmpRLC = calculateR(preProInfo.get(tmpAttribute), allCount, s, k, currentCount) / calculateC(preProInfo.get(tmpAttribute), allCount, s, k, currentCount);
+			double a = calculateR(preProInfo.get(tmpAttribute), allCount, s, k, currentCount);
+			double b = calculateC(preProInfo.get(tmpAttribute), allCount, s, k, currentCount);
+			System.out.println("a = " + a + ", b = " + b);
+			tmpRLC = a/b;
+			//tmpRLC = calculateR(preProInfo.get(tmpAttribute), allCount, s, k, currentCount) / calculateC(preProInfo.get(tmpAttribute), allCount, s, k, currentCount);
 			if (tmpRLC > maxRLC) {
 				maxRLC = tmpRLC;
 				maxAttribute = tmpAttribute;
 			}
+		}
+		if (maxAttribute.equals("")){
+			System.out.println("wtf");
 		}
 		//preProInfo.remove(maxAttribute);
 		return maxAttribute;

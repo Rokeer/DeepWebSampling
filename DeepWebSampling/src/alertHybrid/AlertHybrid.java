@@ -15,15 +15,16 @@ import entity.Attribute;
 
 public class AlertHybrid {
 	static int queryCount = 0;
+	 
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		int sizeOfRequired = 100;
-		int k = 100;
+		int sizeOfRequired = 2000;
+		int k = 30;
 		double C = 1.0/128.0;
-		int s1 = 19;
+		int s1 = 100;
 		int cs = 20;
-		DAO dao = new DAO("uscensus", "alltestusdata", "ahsdb", "attrinfo");
+		DAO dao = new DAO("uscensus", "allusdata", "ahsdb", "attrinfo");
 		ResultSet rs = dao.getInfo();
 		Util u = new Util();
 		Hashtable<String, Hashtable<String, Integer>> preProInfo = new Hashtable<String, Hashtable<String, Integer>>();
@@ -33,8 +34,8 @@ public class AlertHybrid {
 		//DelegateTree<NodeData, EdgeData> graphTree = new DelegateTree<NodeData, EdgeData>();
 		Hashtable<String, String> path = new Hashtable<String, String>();
 		AlertOrder ao = new AlertOrder();
-		
 		int allCount = 0;
+		
 		try {
 			while (rs.next()) {
 				
@@ -64,15 +65,18 @@ public class AlertHybrid {
 		// Let's begin the real deal =.=
 		// first I need estimate all uj
 		preProInfo.clear();
+		allCount = s1;
+		/**
 		rs = dao.getAHCount("*", "*");
 		try {
 			while (rs.next()) {
 				allCount = rs.getInt(1);
+				//System.out.println("allcount :" + allCount);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-			
+		**/	
 		ArrayList<String> tmpList = new ArrayList<String>();
 		//Hashtable<String, Integer> tmpTable = new Hashtable<String, Integer>();
 		String tmpAttribute = "";
@@ -107,6 +111,7 @@ public class AlertHybrid {
 		Hashtable<String, Hashtable<String, Integer>> preProInfoTran;
 		
 		for (int i = 1; i <= sizeOfRequired - s1; i++) {
+			allCount = i + s1 - 1;
 			preProInfoTran = (Hashtable<String, Hashtable<String, Integer>>) preProInfo.clone();
 			path.clear();
 			HybridSAMP(sizeOfRequired-i+1, new DelegateTree<NodeData, EdgeData>(), preProInfoTran, preProInfo, u, allCount, k, null, dao, conditions, rs, sm, path, cs, ao, C, attributes);
@@ -143,6 +148,8 @@ public class AlertHybrid {
 			queryCount = queryCount + ao.select(k, C, dao, rs, attributes, conditions, path);
 			//ao.select(k, C, dao, rs, attributes, conditions, path, tmpCount);
 			preProInfo.clear();
+			
+			/**
 			rs = dao.getAHCount("*", "*");
 			try {
 				while (rs.next()) {
@@ -151,7 +158,9 @@ public class AlertHybrid {
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
-				
+			**/
+			
+			allCount = allCount + 1;
 			ArrayList<String> tmpList = new ArrayList<String>();
 			//Hashtable<String, Integer> tmpTable = new Hashtable<String, Integer>();
 			String tmpAttribute = "";
@@ -180,7 +189,7 @@ public class AlertHybrid {
 				preProInfo.put(tmpAttribute, tmpTable);
 			}
 
-			
+			//System.out.println("BANG!");
 			return;
 		}
 		if (graphTree.getVertexCount() == 0) {
@@ -247,7 +256,6 @@ public class AlertHybrid {
 		// Step 9
 		EdgeData edge = sm.chanceSelect(graphTree.getChildEdges(current), current.getCount());
 		NodeData next = graphTree.getOpposite(current, edge);
-		
 		// add2path
 		path.put(current.getAttribute(), edge.getValue());
 		
@@ -264,6 +272,7 @@ public class AlertHybrid {
 		
 		if (rowCount > k) {
 			System.out.println("Overflow");
+			System.out.println("Next Node: " + next.getAttribute()+" "+next.getCount()+" "+next.getIsDone());
 			HybridSAMP(s, graphTree, preProInfoTran, preProInfo, u, allCount, k, next, dao, conditions, rs, sm, path, cs, ao, C, attributes);
 			
 		} else {
