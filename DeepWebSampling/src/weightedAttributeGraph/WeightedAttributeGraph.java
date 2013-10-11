@@ -22,12 +22,12 @@ public class WeightedAttributeGraph {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		int sizeOfRequired = 100;
-		int k = 10;
+		int sizeOfRequired = 2000;
+		int k = 50;
 		double a = 0.2;
 		double b = 2.0;
 		boolean loopFlag = true;
-		DAO dao = new DAO("uscensus", "allusdata", "wagsdb", "attrinfo");
+		DAO dao = new DAO("uscensus", "usdatanoid", "wagsdb", "attrinfo");
 		WAGA waga = new WAGA();
 		Util util = new Util();
 		UndirectedGraph<Node, Edge> graph;
@@ -112,7 +112,12 @@ public class WeightedAttributeGraph {
 			double tmpS = 0;
 			Node maxNode = null;
 			
+			
 			// Step 7, 8, 9
+			boolean damn = false;
+			do {
+			maxS = 0;
+			tmpS = 0;
 			for (Node n : graph.getVertices()) {
 				tmpS = util.calculateS(graph, n, a, b);
 				//System.out.println("Node: " + n.getAttribute() + " = " + n.getValue() + " S = " + tmpS);
@@ -121,12 +126,17 @@ public class WeightedAttributeGraph {
 					maxNode = n;
 				}
 			}
-
+			if (damn) {
+				System.out.println("oops");
+			}
+			damn = true;
 			
 			// Step 10
 			maxNode = nodes.get(maxNode.getAttribute()+maxNode.getValue());
 			maxNode.setUsedTime(maxNode.getUsedTime() + 1);
 			System.out.println("MaxNode: " + maxNode.getAttribute() + " = " + maxNode.getValue() + " Used Time: " + nodes.get(maxNode.getAttribute()+maxNode.getValue()).getUsedTime());
+			
+			} while (path.containsKey(maxNode.getAttribute()));
 			//maxNode.setUsedTime(maxNode.getUsedTime() + 1);
 
 			

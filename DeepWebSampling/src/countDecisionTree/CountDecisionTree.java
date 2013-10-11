@@ -19,9 +19,9 @@ public class CountDecisionTree {
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		int sizeOfRequired = 100;
-		int k = 10;
-		DAO dao = new DAO("uscensus", "allusdata", "cdtsdb", "attrinfo");
+		int sizeOfRequired = 2000;
+		int k = 50;
+		DAO dao = new DAO("uscensus", "usdatanoid", "cdtsdb", "attrinfo");
 		ResultSet rs = dao.getInfo();
 		Util u = new Util();
 		Hashtable<String, Hashtable<String, Integer>> preProInfo = new Hashtable<String, Hashtable<String, Integer>>();
@@ -31,6 +31,7 @@ public class CountDecisionTree {
 		Hashtable<String, ArrayList<String>> conditions = new Hashtable<String, ArrayList<String>>();
 		DelegateTree<NodeData, EdgeData> graphTree = new DelegateTree<NodeData, EdgeData>();
 		Hashtable<String, String> path = new Hashtable<String, String>();
+		System.out.println("checkpoint 0");
 		try {
 			while (rs.next()) {
 				ArrayList<String> values = new ArrayList<String>();
@@ -46,9 +47,9 @@ public class CountDecisionTree {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
+		System.out.println("checkpoint 1");
 		dao.createSampleDB(attributes);
-
+		System.out.println("checkpoint 1.5");
 		// Let's begin the real deal =.=
 		// first I need estimate all uj
 		rs = dao.getCount("*", "*");
@@ -88,6 +89,7 @@ public class CountDecisionTree {
 			}
 			preProInfo.put(tmpAttribute, tmpTable);
 		}
+		System.out.println("checkpoint 2");
 		// pre process finish, new we can est uj via |u|*(count(ai=vi)/count(*))
 		// but in calculating, i didn't calculate l(u,k). we considered this not influence the result
 		
@@ -113,7 +115,7 @@ public class CountDecisionTree {
 		
 		
 		Hashtable<String, Hashtable<String, Integer>> preProInfoTran;
-		
+		System.out.println("checkpoint 3");
 		for (int i = 1; i <= sizeOfRequired; i++) {
 			preProInfoTran = (Hashtable<String, Hashtable<String, Integer>>) preProInfo.clone();
 			path.clear();
@@ -217,9 +219,14 @@ public class CountDecisionTree {
 		// add2path
 		path.put(current.getAttribute(), edge.getValue());
 		
-		if (next.getCount() > k) {
+		
+		
+		if (next.getCount() > k && preProInfoTran.size() > 0) {
 			System.out.println("Overflow");
 			dtSAMP(s, graphTree, preProInfoTran, u, allCount, k, next, dao, conditions, rs, sm, path);
+		} else if (preProInfoTran.size() == 0){
+			System.out.println("Overflow, but all attributes are set");
+			dao.countDecisionTreeSelect(path);
 		} else {
 			System.out.println("Valid query");
 			dao.countDecisionTreeSelect(path);

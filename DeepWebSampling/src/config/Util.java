@@ -26,15 +26,22 @@ public class Util {
 		String tmpAttribute = "";
 		double maxRLC = -10000.0;
 		double tmpRLC = -10000.0;
-
-		System.out.println("allcount :" + allCount);
+		boolean flag = true;
+		System.out.println("allcount: " + allCount);
 		while (itr.hasNext()) {
 			tmpAttribute = itr.next();
-			double a = calculateR(preProInfo.get(tmpAttribute), allCount, s, k, currentCount);
-			double b = calculateC(preProInfo.get(tmpAttribute), allCount, s, k, currentCount);
-			System.out.println("a = " + a + ", b = " + b);
-			tmpRLC = a/b;
-			//tmpRLC = calculateR(preProInfo.get(tmpAttribute), allCount, s, k, currentCount) / calculateC(preProInfo.get(tmpAttribute), allCount, s, k, currentCount);
+			
+			// double a = calculateR(preProInfo.get(tmpAttribute), allCount, s, k, currentCount);
+			// double b = calculateC(preProInfo.get(tmpAttribute), allCount, s, k, currentCount);
+			// System.out.println("a = " + a + ", b = " + b);
+			// tmpRLC = a/b;
+			tmpRLC = calculateR(preProInfo.get(tmpAttribute), allCount, s, k, currentCount) / calculateC(preProInfo.get(tmpAttribute), allCount, s, k, currentCount);
+			if (flag) {
+				maxRLC = tmpRLC;
+				maxAttribute = tmpAttribute;
+				flag = false;
+			}
+			
 			if (tmpRLC > maxRLC) {
 				maxRLC = tmpRLC;
 				maxAttribute = tmpAttribute;

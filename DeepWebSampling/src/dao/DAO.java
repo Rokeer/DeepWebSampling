@@ -3,6 +3,7 @@ package dao;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -26,6 +27,7 @@ public class DAO {
 			connection = new Conn().getConnection();
 			this.t = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
 				     ResultSet.CONCUR_READ_ONLY);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -39,6 +41,7 @@ public class DAO {
 			this.infoTable = infoTable;
 			connection = new Conn().getConnection();
 			this.t = connection.createStatement();
+			//t.execute("select * from " + database + "." + table);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -47,7 +50,7 @@ public class DAO {
 	public Boolean insertItem(ArrayList<String> sql) {
 		// Statement t;
 		StringBuffer sSQL = new StringBuffer();
-		sSQL.append("INSERT INTO uscensus.alltestusdata VALUES ");
+		sSQL.append("INSERT INTO uscensus.usdata VALUES ");
 		try {
 			// t = connection.createStatement();
 			for (int i = 0; i < sql.size(); i++) {
@@ -81,6 +84,20 @@ public class DAO {
 		return rs;
 	}
 
+	public void createIndex(ArrayList<Attribute> attributes) {
+		String sql = "";
+		try {
+		for (int i = 0; i < attributes.size(); i++) {
+			System.out.println(i);
+			sql = "CREATE INDEX test"+attributes.get(i).getName()+" ON " + database + "." + table + "("+attributes.get(i).getName()+")";
+			//sql = "DROP INDEX test"+attributes.get(i).getName()+" ON " + database + "." + table + "("+attributes.get(i).getName()+")";
+			t.execute(sql);
+		}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public ResultSet getValues(String attribute) {
 		ResultSet rs = null;
 		Statement t;
@@ -148,7 +165,27 @@ public class DAO {
 
 			sql = sql.substring(0, sql.length() - 5);
 
-			//System.out.println("Statment: " + sql);
+			System.out.println("Statment: " + sql);
+			rs = t.executeQuery(sql);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return rs;
+	}
+	
+	public ResultSet getPathCountAlter (String attribute, String value, Hashtable<String, String> path) {
+		String sql = "select count(*) from " + database + ".tmpTable where ";
+		try {
+			//t = connection.createStatement();
+			sql = sql + attribute + " = '" + value + "' AND ";
+			//path.put(attribute, value);
+			for (String key : path.keySet()) {
+				sql = sql + key + " = '" + path.get(key) + "' AND ";
+			}
+
+			sql = sql.substring(0, sql.length() - 5);
+
+			System.out.println("Statment: " + sql);
 			rs = t.executeQuery(sql);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -289,8 +326,9 @@ public class DAO {
 				sql = sql + key + " = '" + path.get(key) + "' AND ";
 			}
 
+			
+			
 			sql = sql.substring(0, sql.length() - 5) + " LIMIT " + (k + 1);
-
 			System.out.println("Statment: " + sql);
 			rs = t.executeQuery(sql);
 		} catch (Exception e) {
@@ -375,6 +413,98 @@ public class DAO {
 			e.printStackTrace();
 		}
 	}
+	
+	public void cdtSelect2TMP(Hashtable<String, String> path) {
+		
+		String sql = "select * from " + database + "." + table + " where ";
+		try {
+			// t = connection.createStatement();
+			t.execute("TRUNCATE TABLE " + database + "." + table);
+			for (String key : path.keySet()) {
+				sql = sql + key + " = '" + path.get(key) + "' AND ";
+			}
+
+			sql = sql.substring(0, sql.length() - 5);
+
+			//System.out.println("Statment: " + sql);
+			rs = t.executeQuery(sql);
+			/**
+			StringBuffer sSQL = new StringBuffer();
+			sSQL.append("INSERT INTO uscensus.alltestusdata VALUES ");
+			while (rs.next()) {
+				rs.d
+				// t = connection.createStatement();
+				for (int i = 0; i < sql.size(); i++) {
+					sSQL.append("(");
+					sSQL.append(sql.get(i));
+					sSQL.append("),");
+					//t.addBatch(sql.get(i));
+				}
+				//t.executeBatch();
+				sSQL.deleteCharAt(sSQL.length()-1);
+				//System.out.println(sSQL.toString());
+				t.execute(sSQL.toString());
+					
+			}
+			**/
+			rs.last();
+			Random random = new Random();
+			int times = Math.abs(random.nextInt() % rs.getRow()) + 1;
+			ResultSetMetaData rsmd = rs.getMetaData();
+			int columnCount = rsmd.getColumnCount();
+			rs.beforeFirst();
+			
+			for(int i = 0; i < times; i++) {
+				rs.next();
+			}
+			
+			String stat = "";
+			//t = connection.createStatement();
+			for (int i = 0; i < columnCount; i++) {
+				stat = stat + "'" + rs.getString(i + 1) + "',";
+			}
+			t.execute("insert into " + database + "." + sampleTable + " values (" + stat.substring(0, stat.length() - 1) + ")");
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void countDecisionTreeSelectAlter(Hashtable<String, String> path) {
+		String sql = "select * from " + database + ".tmpTable where ";
+		try {
+			// t = connection.createStatement();
+
+			for (String key : path.keySet()) {
+				sql = sql + key + " = '" + path.get(key) + "' AND ";
+			}
+
+			sql = sql.substring(0, sql.length() - 5);
+
+			//System.out.println("Statment: " + sql);
+			rs = t.executeQuery(sql);
+			rs.last();
+			Random random = new Random();
+			int times = Math.abs(random.nextInt() % rs.getRow()) + 1;
+			ResultSetMetaData rsmd = rs.getMetaData();
+			int columnCount = rsmd.getColumnCount();
+			rs.beforeFirst();
+			
+			for(int i = 0; i < times; i++) {
+				rs.next();
+			}
+			
+			String stat = "";
+			//t = connection.createStatement();
+			for (int i = 0; i < columnCount; i++) {
+				stat = stat + "'" + rs.getString(i + 1) + "',";
+			}
+			t.execute("insert into " + database + "." + sampleTable + " values (" + stat.substring(0, stat.length() - 1) + ")");
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 	public void createSampleDB(ArrayList<Attribute> al) {
 		Statement t;
@@ -382,6 +512,20 @@ public class DAO {
 		try {
 			t = connection.createStatement();
 			t.execute("drop table IF EXISTS " + database + "." + sampleTable);
+			for (int i = 0; i < al.size(); i++) {
+				stat = stat + al.get(i).getName() + " char(45), ";
+			}
+			stat = stat.substring(0, stat.length() - 2) + ")";
+			t.execute(stat);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		stat = "create table " + database + ".tmpTable (";
+		try {
+			t = connection.createStatement();
+			t.execute("drop table IF EXISTS " + database + ".tmpTable");
 			for (int i = 0; i < al.size(); i++) {
 				stat = stat + al.get(i).getName() + " char(45), ";
 			}
@@ -498,6 +642,56 @@ public class DAO {
 			e.printStackTrace();
 		}
 		return true;
+	}
+	
+	public void testDatabase(ArrayList<Attribute> attributes) {
+		try {
+			String stat = "select * from " + database
+					+ "." + table + " GROUP BY ";
+			for (int i = 0; i < attributes.size(); i++) {
+				stat = stat + attributes.get(i).getName() + ", ";
+			}
+			stat = stat.substring(0, stat.length()-2);
+			System.out.println(stat);
+			ResultSet tmpRS = t.executeQuery(stat);
+			tmpRS.last();
+			System.out.println(tmpRS.getRow());
+			//t.execute("insert into " + database + ".attrinfo values ('" + attribute + "', '" + values +"')");
+			//t.executeQuery("select count(*) from " + database + "." + sampleTable);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	public ResultSet testDatabase2(int i) {
+		try {
+			t = connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
+			        ResultSet.CONCUR_UPDATABLE);
+			//String stat = "select * from " + database
+			//		+ "." + table + " order by caseid LIMIT " + i + ",10000";
+			String stat = "select * from " + database
+					+ "." + table + " where caseid>=(select caseid from " + database
+					+ "." + table + " order by caseid limit " + i + ",1) limit 10000";
+			//String stat = "select id,title from collect where id>=(select id from collect order by id limit 90000,1) limit 10";
+			System.out.println(stat);
+			rs = t.executeQuery(stat);
+			//tmpRS.last();
+			//System.out.println(tmpRS.getRow());
+			//t.execute("insert into " + database + ".attrinfo values ('" + attribute + "', '" + values +"')");
+			//t.executeQuery("select count(*) from " + database + "." + sampleTable);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return rs;
+	}
+	public void close() {
+		try {
+			t.close();
+			rs.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
 }

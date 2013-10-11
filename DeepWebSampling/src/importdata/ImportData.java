@@ -27,14 +27,14 @@ public class ImportData {
 			
 			long a = System.currentTimeMillis();
 			long b,c;
-			while ((row = br.readLine()) != null && count < 1000) {
-			//while ((row = br.readLine()) != null) {
+			//while ((row = br.readLine()) != null && count < 1000) {
+			while ((row = br.readLine()) != null) {
 				// System.out.println(row);
 				b = System.currentTimeMillis();
 				attributes = row.split(",");
 				sql = "";
 				//sql = "INSERT INTO uscensus.alltestusdata VALUES (";
-				for (int i = 1; i < attributes.length; i++) {
+				for (int i = 0; i < attributes.length; i++) {
 					sql = sql + "'" + attributes[i] + "',";
 				}
 				//sql = sql.substring(0, sql.length() - 1) + ")";
@@ -51,6 +51,7 @@ public class ImportData {
 				}
 				
 			}
+			dao.insertItem(sqls);
 			c = System.currentTimeMillis();
 		    System.out.println("Running time for all record: " + (c - a));
 

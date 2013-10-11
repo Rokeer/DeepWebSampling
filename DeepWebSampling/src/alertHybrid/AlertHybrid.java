@@ -15,16 +15,16 @@ import entity.Attribute;
 
 public class AlertHybrid {
 	static int queryCount = 0;
-	 
+	static int hey = 0;
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		int sizeOfRequired = 2000;
-		int k = 30;
+		int k = 50;
 		double C = 1.0/128.0;
 		int s1 = 100;
-		int cs = 20;
-		DAO dao = new DAO("uscensus", "allusdata", "ahsdb", "attrinfo");
+		int cs = 2;
+		DAO dao = new DAO("uscensus", "usdatanoid", "ahsdb1", "attrinfo");
 		ResultSet rs = dao.getInfo();
 		Util u = new Util();
 		Hashtable<String, Hashtable<String, Integer>> preProInfo = new Hashtable<String, Hashtable<String, Integer>>();
@@ -118,7 +118,7 @@ public class AlertHybrid {
 			System.out.println("SampleDB count: " + (i + s1));
 		}
 		System.out.println("Query: " + queryCount);
-		
+		System.out.println(hey);
 	}
 	
 	public static void HybridSAMP(int s,
@@ -144,6 +144,7 @@ public class AlertHybrid {
 		}
 		System.out.println(queryCount);
 		if (rowCount < cs) {
+			hey = hey + 1;
 			// select and update preProInfo
 			queryCount = queryCount + ao.select(k, C, dao, rs, attributes, conditions, path);
 			//ao.select(k, C, dao, rs, attributes, conditions, path, tmpCount);
@@ -189,7 +190,7 @@ public class AlertHybrid {
 				preProInfo.put(tmpAttribute, tmpTable);
 			}
 
-			//System.out.println("BANG!");
+			System.out.println("BANG!");
 			return;
 		}
 		if (graphTree.getVertexCount() == 0) {
@@ -270,11 +271,14 @@ public class AlertHybrid {
 			e.printStackTrace();
 		}
 		
-		if (rowCount > k) {
+		if (rowCount > k && preProInfoTran.size() > 0) {
 			System.out.println("Overflow");
 			System.out.println("Next Node: " + next.getAttribute()+" "+next.getCount()+" "+next.getIsDone());
 			HybridSAMP(s, graphTree, preProInfoTran, preProInfo, u, allCount, k, next, dao, conditions, rs, sm, path, cs, ao, C, attributes);
 			
+		} else if (preProInfoTran.size() == 0){
+			System.out.println("Overflow, but all attributes are set");
+			dao.countDecisionTreeSelect(path);
 		} else {
 			System.out.println("Valid query");
 			dao.countDecisionTreeSelect(path);

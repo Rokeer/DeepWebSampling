@@ -27,7 +27,7 @@ public class WAGA {
 			String keyFirst = "";
 			String keyLast = "";
 
-			while (rs.next() && rs.getRow() < k) {
+			while (rs.next() && rs.getRow() <= k) {
 				// i'm not sure it is right so far
 				for (int i = 0; i < columnCount; i++) {
 					keyFirst = rsmd.getColumnName(i + 1) + rs.getString(i + 1);
@@ -54,6 +54,7 @@ public class WAGA {
 
 						graph.addEdge(new Edge(), nodes.get(keyFirst),
 								nodes.get(keyLast));
+						
 						/**
 						 * if(graph.containsEdge(graph.findEdge(nodes.get(
 						 * keyFirst), nodes.get(keyLast)))) { Edge tmpE =

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import dao.DAO;
 import entity.Attribute;
 
-public class Analization {
+public class CreateIndex {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -21,22 +21,7 @@ public class Analization {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-
-		for (int i = 0; i < attributes.size(); i++) {
-			System.out.println(i);
-			rs = dao.getValues(attributes.get(i).getName());
-			String values = "";
-			//ArrayList<String> values = new ArrayList<String>();
-			try {
-				while (rs.next()) {
-					values = values + rs.getString(1) + "\\;";
-					//values.add(rs.getString(1));
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-			dao.save2info(attributes.get(i).getName(), values.substring(0, (values.length() - 2)));
-		}
+		dao.createIndex(attributes);
 		System.out.println("Well Done!");
 	}
 

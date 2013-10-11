@@ -14,10 +14,10 @@ public class RandomSampler {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		int sizeOfRequired = 100;
-		int k = 10;
+		int sizeOfRequired = 2000;
+		int k = 50;
 		boolean loopFlag = true;
-		DAO dao = new DAO("uscensus", "allusdata", "rsdb", "attrinfo");
+		DAO dao = new DAO("uscensus", "usdatanoid", "rsdb1", "attrinfo");
 		ResultSet rs = dao.getInfo();
 		ArrayList<Attribute> attributes = new ArrayList<Attribute>();
 		Hashtable<String, ArrayList<String>> conditions = new Hashtable<String, ArrayList<String>>();
@@ -79,7 +79,7 @@ public class RandomSampler {
 			if (rowCount <= k && rowCount > 0) {
 				// valid query
 				System.out.println("Valid query");
-				loopFlag = dao.save2SampleDB(rs, sizeOfRequired, 1.0);
+				loopFlag = dao.save2SampleDB(rs, sizeOfRequired, (1.0/k));
 				path.clear();
 			} else if (rowCount > k) {
 				// overflow

@@ -14,11 +14,11 @@ public class HiddenDBSampler {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		int sizeOfRequired = 100;
-		int k = 10;
+		int sizeOfRequired = 2000;
+		int k = 50;
 		double C = 1.0/128.0;
 		boolean loopFlag = true;
-		DAO dao = new DAO("uscensus", "allusdata", "hdbsdb", "attrinfo");
+		DAO dao = new DAO("uscensus", "usdatanoid", "hdbsdb", "attrinfo");
 		ResultSet rs = dao.getInfo();
 		ArrayList<Attribute> attributes = new ArrayList<Attribute>();
 		Hashtable<String, ArrayList<String>> conditions = new Hashtable<String, ArrayList<String>>();
