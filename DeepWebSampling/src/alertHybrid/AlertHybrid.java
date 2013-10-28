@@ -15,16 +15,17 @@ import entity.Attribute;
 
 public class AlertHybrid {
 	static int queryCount = 0;
+	static int queryByAH = 0;
 	static int hey = 0;
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		int sizeOfRequired = 2000;
-		int k = 50;
-		double C = 1.0/128.0;
-		int s1 = 100;
-		int cs = 2;
-		DAO dao = new DAO("uscensus", "usdatanoid", "ahsdb1", "attrinfo");
+		int sizeOfRequired = 10000;
+		int k = 100;
+		double C = 1.0/256.0;
+		int s1 = 2000;
+		int cs = 5;
+		DAO dao = new DAO("uscensus", "usdatanoid", "ahsdb", "attrinfo");
 		ResultSet rs = dao.getInfo();
 		Util u = new Util();
 		Hashtable<String, Hashtable<String, Integer>> preProInfo = new Hashtable<String, Hashtable<String, Integer>>();
@@ -57,8 +58,11 @@ public class AlertHybrid {
 		
 		// Step 1 to 3
 		// Use Alert-Order to select and estimate u and uj.
+		ArrayList<Integer> tmp = new ArrayList<Integer>();
 		for (int i = 0; i < s1; i++) {
-			queryCount = queryCount + ao.select(k, C, dao, rs, attributes, conditions, path);
+			tmp = ao.select(k, C, dao, rs, attributes, conditions, path);
+			queryCount = queryCount + tmp.get(0);
+			i = i + tmp.get(1) - 1;
 		}
 		
 		// after we select some records, we need to update the u and uj information
@@ -109,19 +113,21 @@ public class AlertHybrid {
 		
 		System.out.println("********************************************************************");
 		Hashtable<String, Hashtable<String, Integer>> preProInfoTran;
-		
+		int addedResult = 0;
 		for (int i = 1; i <= sizeOfRequired - s1; i++) {
 			allCount = i + s1 - 1;
 			preProInfoTran = (Hashtable<String, Hashtable<String, Integer>>) preProInfo.clone();
 			path.clear();
-			HybridSAMP(sizeOfRequired-i+1, new DelegateTree<NodeData, EdgeData>(), preProInfoTran, preProInfo, u, allCount, k, null, dao, conditions, rs, sm, path, cs, ao, C, attributes);
+			addedResult = HybridSAMP(sizeOfRequired-i+1, new DelegateTree<NodeData, EdgeData>(), preProInfoTran, preProInfo, u, allCount, k, null, dao, conditions, rs, sm, path, cs, ao, C, attributes);
+			i = i + addedResult - 1;
 			System.out.println("SampleDB count: " + (i + s1));
 		}
 		System.out.println("Query: " + queryCount);
+		System.out.println("Query2: " + queryByAH);
 		System.out.println(hey);
 	}
 	
-	public static void HybridSAMP(int s,
+	public static int HybridSAMP(int s,
 			DelegateTree<NodeData, EdgeData> graphTree,
 			Hashtable<String, Hashtable<String, Integer>> preProInfoTran,
 			Hashtable<String, Hashtable<String, Integer>> preProInfo, Util u,
@@ -146,7 +152,10 @@ public class AlertHybrid {
 		if (rowCount < cs) {
 			hey = hey + 1;
 			// select and update preProInfo
-			queryCount = queryCount + ao.select(k, C, dao, rs, attributes, conditions, path);
+			ArrayList<Integer> tmp = new ArrayList<Integer>();
+			tmp = ao.select(k, C, dao, rs, attributes, conditions, path);
+			queryCount = queryCount + tmp.get(0);
+			
 			//ao.select(k, C, dao, rs, attributes, conditions, path, tmpCount);
 			preProInfo.clear();
 			
@@ -191,7 +200,7 @@ public class AlertHybrid {
 			}
 
 			System.out.println("BANG!");
-			return;
+			return tmp.get(1);
 		}
 		if (graphTree.getVertexCount() == 0) {
 			String root = u.calculateRLC(preProInfoTran, allCount, s, k,
@@ -262,6 +271,7 @@ public class AlertHybrid {
 		
 		rs = dao.alertHybridSelect(path, k);
 		queryCount = queryCount + 1;
+		queryByAH = queryByAH + 1;
 		rowCount = 0;
 		try {
 			rs.last();
@@ -273,17 +283,18 @@ public class AlertHybrid {
 		
 		if (rowCount > k && preProInfoTran.size() > 0) {
 			System.out.println("Overflow");
-			System.out.println("Next Node: " + next.getAttribute()+" "+next.getCount()+" "+next.getIsDone());
-			HybridSAMP(s, graphTree, preProInfoTran, preProInfo, u, allCount, k, next, dao, conditions, rs, sm, path, cs, ao, C, attributes);
+			//System.out.println("Next Node: " + next.getAttribute()+" "+next.getCount()+" "+next.getIsDone());
+			return HybridSAMP(s, graphTree, preProInfoTran, preProInfo, u, allCount, k, next, dao, conditions, rs, sm, path, cs, ao, C, attributes);
 			
 		} else if (preProInfoTran.size() == 0){
 			System.out.println("Overflow, but all attributes are set");
 			dao.countDecisionTreeSelect(path);
+			return 1;
 		} else {
 			System.out.println("Valid query");
 			dao.countDecisionTreeSelect(path);
+			return 1;
 		}
-		
 		
 	}
 	

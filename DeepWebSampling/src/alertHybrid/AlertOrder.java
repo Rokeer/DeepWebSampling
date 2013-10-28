@@ -15,22 +15,26 @@ public class AlertOrder {
 		
 	}
 	
-	public int select(int k, double C, DAO dao, ResultSet rs,
+	@SuppressWarnings("unchecked")
+	public ArrayList<Integer> select(int k, double C, DAO dao, ResultSet rs,
 			ArrayList<Attribute> attributes,
 			Hashtable<String, ArrayList<String>> conditions,
-			Hashtable<String, String> path) {
-		
+			Hashtable<String, String> oriPath) {
+		Hashtable<String, String> path = (Hashtable<String, String>) oriPath.clone();
 		boolean loopFlag = true;
+		ArrayList<Integer> result = new ArrayList<Integer>();
 		int queryCount = 0;
+		int resultCount = 0;
 		// Let's begin the real deal =.=
 		// make attributes in increase order
-		MyAttributeCompare comparator = new MyAttributeCompare();
-		Collections.sort(attributes, comparator);
+		//MyAttributeCompare comparator = new MyAttributeCompare();
+		//Collections.sort(attributes, comparator);
 		
 		// Yeah! Let's working on data!
 		//int queryCount = 0;
 		do {
-			rs = dao.hiddenDBSelect(attributes, conditions, path, k);
+			//rs = dao.alertOrderSelect(attributes, conditions, path, k);
+			rs = dao.randomSelect(attributes, conditions, path, k);
 			queryCount = queryCount + 1;
 			int rowCount = 0;
 			try {
@@ -49,20 +53,24 @@ public class AlertOrder {
 					probability = 1.0;
 				}
 				loopFlag = false;
-				dao.save2SampleDBAOver(rs, probability, rowCount);
-				path.clear();
+				//resultCount = 
+						dao.save2SampleDBAOver(rs, probability, rowCount);
+				path = (Hashtable<String, String>) oriPath.clone();
+				//path.clear();
 			} else if (rowCount > k) {
 				// overflow
 				System.out.println("Overflow");
 			} else if (rowCount == 0) {
 				// underflow
 				System.out.println("Underflow");
-				path.clear();
+				path = (Hashtable<String, String>) oriPath.clone();
+				//path.clear();
 			}
 
 		} while (loopFlag);
-		
-		return queryCount;
+		result.add(queryCount);
+		result.add(resultCount);
+		return result;
 	}
 	
 }

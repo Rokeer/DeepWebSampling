@@ -22,6 +22,7 @@ public class BruteForceSampler {
 		ArrayList<Attribute> attributes = new ArrayList<Attribute>();
 		Hashtable<String, ArrayList<String>> conditions = new Hashtable<String, ArrayList<String>>();
 		Hashtable<String, String> path = new Hashtable<String, String>();
+		Hashtable<Integer, String> ht = new Hashtable<Integer, String>();
 		
 		try {
 			while (rs.next()) {
@@ -80,7 +81,7 @@ public class BruteForceSampler {
 			if (rowCount <= k && rowCount > 0) {
 				// valid query
 				System.out.println("Valid query");
-				loopFlag = dao.save2SampleDB(rs, sizeOfRequired, 1.0);
+				loopFlag = dao.save2SampleDB(rs, sizeOfRequired, 1.0, ht);
 				path.clear();
 			} else if (rowCount > k) {
 				// overflow

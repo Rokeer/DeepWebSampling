@@ -14,15 +14,17 @@ public class HiddenDBSampler {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		int sizeOfRequired = 2000;
-		int k = 50;
-		double C = 1.0/128.0;
+		int sizeOfRequired = 10000;
+		int k = 100;
+		//double C = 1.0/4000000.0;
+		double C = 1.0/4.0;
 		boolean loopFlag = true;
-		DAO dao = new DAO("uscensus", "usdatanoid", "hdbsdb", "attrinfo");
+		DAO dao = new DAO("uscensus", "usdatanoid", "hdbsdb4", "attrinfo");
 		ResultSet rs = dao.getInfo();
 		ArrayList<Attribute> attributes = new ArrayList<Attribute>();
 		Hashtable<String, ArrayList<String>> conditions = new Hashtable<String, ArrayList<String>>();
 		Hashtable<String, String> path = new Hashtable<String, String>();
+		Hashtable<Integer, String> ht = new Hashtable<Integer, String>();
 		try {
 			while (rs.next()) {
 				
@@ -74,6 +76,8 @@ public class HiddenDBSampler {
 		
 		// Yeah! Let's working on data!
 		int queryCount = 0;
+		int a = 0;
+		int b = 0;
 		do {
 			rs = dao.hiddenDBSelect(attributes, conditions, path, k);
 			queryCount = queryCount + 1;
@@ -88,12 +92,13 @@ public class HiddenDBSampler {
 			if (rowCount <= k && rowCount > 0) {
 				// valid query
 				System.out.println("Valid query");
-				
+				a = a + path.size();
+				b = b + 1;
 				double probability = C * rowCount * Math.pow(2.0, path.size()-1.0);
 				if (probability > 1.0) {
 					probability = 1.0;
 				}
-				loopFlag = dao.save2SampleDB(rs, sizeOfRequired, probability);
+				loopFlag = dao.save2SampleDB(rs, sizeOfRequired, probability, ht);
 				path.clear();
 			} else if (rowCount > k) {
 				// overflow
@@ -106,6 +111,7 @@ public class HiddenDBSampler {
 
 		} while (loopFlag);
 		System.out.println("Query: " + queryCount);
+		System.out.println("a:"+a+",b:"+b);
 		/**
 		for (int j = 0; j < attributes.size(); j++) {
 			System.out.println(attributes.get(j).getName() + " "

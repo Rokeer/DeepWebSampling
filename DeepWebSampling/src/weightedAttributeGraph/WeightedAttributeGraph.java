@@ -8,12 +8,14 @@ import java.util.Iterator;
 
 
 
+import java.util.Random;
 import java.util.Set;
 
 import config.Util;
 import config.WAGA;
 import dao.DAO;
 import edu.uci.ics.jung.graph.UndirectedGraph;
+import edu.uci.ics.jung.graph.UndirectedSparseMultigraph;
 import entity.Attribute;
 import entity.Edge;
 import entity.Node;
@@ -22,20 +24,24 @@ public class WeightedAttributeGraph {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		int sizeOfRequired = 2000;
+		int sizeOfRequired = 5000;
 		int k = 50;
 		double a = 0.2;
 		double b = 2.0;
 		boolean loopFlag = true;
-		DAO dao = new DAO("uscensus", "usdatanoid", "wagsdb", "attrinfo");
+		Random rand = new Random();
+		int randomRemove = 0;
+		DAO dao = new DAO("uscensus", "usdatanoid", "wagsdb4", "attrinfo");
 		WAGA waga = new WAGA();
 		Util util = new Util();
-		UndirectedGraph<Node, Edge> graph;
+		UndirectedGraph<Node, Edge> graph = new UndirectedSparseMultigraph<Node, Edge>();;
 		ResultSet rs = dao.getInfo();
 		Hashtable<String, Node> nodes = new Hashtable<String, Node>();
 		ArrayList<Attribute> attributes = new ArrayList<Attribute>();
 		Hashtable<String, ArrayList<String>> conditions = new Hashtable<String, ArrayList<String>>();
 		Hashtable<String, String> path = new Hashtable<String, String>();
+		Hashtable<Integer, String> ht = new Hashtable<Integer, String>();
+		Hashtable<Integer, String> localDB = new Hashtable<Integer, String>();
 		
 		try {
 			while (rs.next()) {
@@ -105,7 +111,8 @@ public class WeightedAttributeGraph {
 
 			// Step 6
 			
-			graph = waga.createGraph(rs, nodes, k);
+			//graph = waga.createGraph(graph, rs, nodes, k);
+			waga.createGraph(graph, rs, nodes, k, localDB);
 			System.out.println("Graph Vertex count: " + graph.getVertexCount() + " Edge count: " + graph.getEdgeCount());
 
 			double maxS = 0;
@@ -145,7 +152,7 @@ public class WeightedAttributeGraph {
 			if (rowCount <= k && rowCount > 0) {
 				// valid query
 				System.out.println("Valid query");
-				loopFlag = dao.save2SampleDB(rs, sizeOfRequired, 1.0);
+				loopFlag = dao.save2SampleDB(rs, sizeOfRequired, 1.0, ht);
 				path.clear();
 			} else if (rowCount > k) {
 				// overflow
@@ -154,7 +161,11 @@ public class WeightedAttributeGraph {
 				// underflow
 				System.out.println("Underflow");
 				Set<String> keys = path.keySet();
+				randomRemove = rand.nextInt(keys.size());
 				Iterator<String> itr = keys.iterator();
+				for (int i = 0; i < randomRemove; i++) {
+					itr.next();
+				}
 				path.remove(itr.next());
 			}
 			path.put(maxNode.getAttribute(), maxNode.getValue());

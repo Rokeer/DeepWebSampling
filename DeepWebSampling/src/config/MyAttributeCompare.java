@@ -10,10 +10,10 @@ public class MyAttributeCompare implements Comparator<Attribute> {
 		Attribute attribute1 = arg1;
 
 		//smallest to largest
-		//int flag = attribute0.getHasNodes() - attribute1.getHasNodes();
+		int flag = attribute0.getHasNodes() - attribute1.getHasNodes();
 		
 		//largest to smallest
-		int flag = attribute1.getHasNodes() - attribute0.getHasNodes();
+		//int flag = attribute1.getHasNodes() - attribute0.getHasNodes();
 		
 		if (flag == 0) {
 			return attribute0.getName().compareTo(attribute1.getName());

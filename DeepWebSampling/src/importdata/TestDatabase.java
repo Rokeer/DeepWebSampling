@@ -10,12 +10,12 @@ import entity.Attribute;
 
 public class TestDatabase {
 
+	// reduce duplicate items in database
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		DAO dao = new DAO("uscensus", "usdata", "", "attrinfo");
 		//ResultSet rs = dao.getCount("*", "*");
 		Hashtable<Integer, String> ht = new Hashtable<Integer, String>();
-		ArrayList<String> sqls = new ArrayList<String>();
 		
 		ResultSet rs = dao.getAttributes();
 		ArrayList<Attribute> attributes = new ArrayList<Attribute>();

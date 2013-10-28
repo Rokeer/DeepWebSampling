@@ -22,6 +22,7 @@ public class RandomSampler {
 		ArrayList<Attribute> attributes = new ArrayList<Attribute>();
 		Hashtable<String, ArrayList<String>> conditions = new Hashtable<String, ArrayList<String>>();
 		Hashtable<String, String> path = new Hashtable<String, String>();
+		Hashtable<Integer, String> ht = new Hashtable<Integer, String>();
 		/**
 		try {
 			while (rs.next()) {
@@ -79,7 +80,7 @@ public class RandomSampler {
 			if (rowCount <= k && rowCount > 0) {
 				// valid query
 				System.out.println("Valid query");
-				loopFlag = dao.save2SampleDB(rs, sizeOfRequired, (1.0/k));
+				loopFlag = dao.save2SampleDB(rs, sizeOfRequired, (1.0/k), ht);
 				path.clear();
 			} else if (rowCount > k) {
 				// overflow

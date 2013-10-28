@@ -315,6 +315,44 @@ public class DAO {
 		return rs;
 	}
 	
+	public ResultSet alertOrderSelect(ArrayList<Attribute> attributes,
+			Hashtable<String, ArrayList<String>> conditions,
+			Hashtable<String, String> path, int k) {
+		//ResultSet rs = null;
+		// Statement t;
+		Random random = new Random();
+
+		
+		String attribute = "";
+		int count = 0;
+		do {
+			attribute = attributes.get(count).getName();
+			count++;
+		} while (path.containsKey(attribute));
+		
+		int valueCount = Math.abs(random.nextInt()
+				% conditions.get(attribute).size());
+		String value = conditions.get(attribute).get(valueCount);
+		String sql = "select * from " + database + "." + table + " where ";
+		try {
+			// t = connection.createStatement();
+			path.put(attribute, value);
+
+			for (String key : path.keySet()) {
+				sql = sql + key + " = '" + path.get(key) + "' AND ";
+			}
+
+			sql = sql.substring(0, sql.length() - 5) + " LIMIT " + (k + 1);
+
+			System.out.println("Statment: " + sql);
+			rs = t.executeQuery(sql);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return rs;
+	}
+	
 	public ResultSet weightedAttributeGraphSelect(Hashtable<String, String> path, int k) {
 		//ResultSet rs = null;
 		// Statement t;
@@ -516,6 +554,19 @@ public class DAO {
 				stat = stat + al.get(i).getName() + " char(45), ";
 			}
 			stat = stat.substring(0, stat.length() - 2) + ")";
+			//stat = stat.substring(0, stat.length() - 2);
+			//stat = stat + ", UNIQUE KEY test1 (";
+			/**
+			for (int m = 0; m < al.size() / 16; m++) {
+				stat = stat + ", UNIQUE KEY test" + m + " (";
+				for (int i = 0; i < 16; i++) {
+					stat = stat + al.get(i + 16 * m).getName() + ", ";
+				}
+				stat = stat.substring(0, stat.length() - 2)  + ")";
+			}
+			stat = stat + ")";
+			**/
+			//stat = stat.substring(0, stat.length() - 2) + "))";
 			t.execute(stat);
 
 		} catch (Exception e) {
@@ -537,7 +588,7 @@ public class DAO {
 		}
 	}
 
-	public boolean save2SampleDB(ResultSet rs, int size, double probability) {
+	public boolean save2SampleDB(ResultSet rs, int size, double probability, Hashtable<Integer, String> ht) {
 		Statement t;
 		String stat = "";
 		SlotMachine sm = new SlotMachine();
@@ -552,24 +603,26 @@ public class DAO {
 					stat = stat + "'" + rs.getString(i + 1) + "',";
 				}
 				// System.out.println(stat);
-				if (probability == 1.0) {
-					t.execute("insert into " + database + "." + sampleTable
-							+ " values ("
-							+ stat.substring(0, stat.length() - 1) + ")");
-				} else if (sm.toDoOrNotToDo(probability)) {
-					t.execute("insert into " + database + "." + sampleTable
-							+ " values ("
-							+ stat.substring(0, stat.length() - 1) + ")");
+				if(!ht.containsKey(stat.hashCode()) && ht.size() < size){
+					if (probability == 1.0) {
+						t.execute("insert into " + database + "." + sampleTable
+								+ " values ("
+								+ stat.substring(0, stat.length() - 1) + ")");
+					} else if (sm.toDoOrNotToDo(probability)) {
+						t.execute("insert into " + database + "." + sampleTable
+								+ " values ("
+								+ stat.substring(0, stat.length() - 1) + ")");
+					}
+					ht.put(stat.hashCode(), "1");
 				}
+					
+				
 
 			}
 
-			t = connection.createStatement();
-			ResultSet tmpRS = t.executeQuery("select count(*) from " + database
-					+ "." + sampleTable);
-			tmpRS.next();
-			System.out.println("SampleDB count: " + tmpRS.getInt(1));
-			if (tmpRS.getInt(1) >= size) {
+			
+			System.out.println("SampleDB count: " + ht.size());
+			if (ht.size() >= size) {
 				return false;
 			}
 		} catch (Exception e) {
@@ -582,15 +635,15 @@ public class DAO {
 		//Statement t;
 		String stat = "";
 		SlotMachine sm = new SlotMachine();
-		boolean flag = true;
+		//boolean flag = true;
 		try {
 			ResultSetMetaData rsmd = rs.getMetaData();
 			int columnCount = rsmd.getColumnCount();
 			rs.beforeFirst();
 			
-			while (flag == true && rs.next()) {
+			while (rs.next()) {
 				stat = "";
-				//t = connection.createStatement();
+				t = connection.createStatement();
 				for (int i = 0; i < columnCount; i++) {
 					stat = stat + "'" + rs.getString(i + 1) + "',";
 				}
@@ -599,15 +652,16 @@ public class DAO {
 					t.execute("insert into " + database + "." + sampleTable
 							+ " values ("
 							+ stat.substring(0, stat.length() - 1) + ")");
-					flag = false;
+					//flag = false;
 				} else if (sm.toDoOrNotToDo(probability)) {
 					t.execute("insert into " + database + "." + sampleTable
 							+ " values ("
 							+ stat.substring(0, stat.length() - 1) + ")");
-					flag = false;
+					//flag = false;
 				}
 
 			}
+			/**
 			if (flag) {
 				Random random = new Random();
 				int times = Math.abs(random.nextInt() % rowCount) + 1;
@@ -625,7 +679,7 @@ public class DAO {
 				t.execute("insert into " + database + "." + sampleTable + " values (" + stat.substring(0, stat.length() - 1) + ")");
 				
 			}
-
+			 **/
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -692,6 +746,29 @@ public class DAO {
 			e.printStackTrace();
 		}
 		
+	}
+	public void selectAll() {
+		
+		try {
+			rs = t.executeQuery("select * from " + database
+					+ "." + table);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	public ResultSet getCountFromSample(String attribute, String value, String table) {
+		try {
+			//t = connection.createStatement();
+			if (attribute.equals("*")) {
+				rs = t.executeQuery("select count(*) from " + database + "." + table);
+			} else {
+				rs = t.executeQuery("select count(*) from " + database + "." + table + " where " + attribute + " = '" + value + "'");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return rs;
 	}
 
 }
