@@ -212,6 +212,38 @@ public class DAO {
 		}
 		return rs;
 	}
+	
+	public ResultSet getSample (String attribute, String value) {
+		try {
+			//t = connection.createStatement();
+			if (attribute.equals("*")) {
+				rs = t.executeQuery("select * from " + database + "." + sampleTable);
+			} else {
+				rs = t.executeQuery("select * from " + database + "." + sampleTable + " where " + attribute + " = '" + value + "'");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return rs;
+	}
+	
+	public ResultSet getProbPathCount (Hashtable<String, String> path) {
+		String sql = "select count(*) from " + database + "." + table + " where ";
+		try {
+			//t = connection.createStatement();
+			for (String key : path.keySet()) {
+				sql = sql + key + " = '" + path.get(key) + "' AND ";
+			}
+
+			sql = sql.substring(0, sql.length() - 5);
+
+			//System.out.println("Statment: " + sql);
+			rs = t.executeQuery(sql);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return rs;
+	}
 
 	public ResultSet randomSelect(ArrayList<Attribute> attributes,
 			Hashtable<String, ArrayList<String>> conditions,
@@ -631,8 +663,9 @@ public class DAO {
 		return true;
 	}
 	
-	public void save2SampleDBAOver(ResultSet rs, double probability, int rowCount) {
+	public int save2SampleDBAOver(ResultSet rs, double probability, int rowCount) {
 		//Statement t;
+		int result = 0;
 		String stat = "";
 		SlotMachine sm = new SlotMachine();
 		//boolean flag = true;
@@ -652,11 +685,13 @@ public class DAO {
 					t.execute("insert into " + database + "." + sampleTable
 							+ " values ("
 							+ stat.substring(0, stat.length() - 1) + ")");
+					result = result + 1;
 					//flag = false;
 				} else if (sm.toDoOrNotToDo(probability)) {
 					t.execute("insert into " + database + "." + sampleTable
 							+ " values ("
 							+ stat.substring(0, stat.length() - 1) + ")");
+					result = result + 1;
 					//flag = false;
 				}
 
@@ -683,6 +718,7 @@ public class DAO {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		return result;
 	}
 	
 	public boolean save2info(String attribute, String values) {

@@ -34,7 +34,7 @@ public class WeightedAttributeGraph {
 		DAO dao = new DAO("uscensus", "usdatanoid", "wagsdb4", "attrinfo");
 		WAGA waga = new WAGA();
 		Util util = new Util();
-		UndirectedGraph<Node, Edge> graph = new UndirectedSparseMultigraph<Node, Edge>();;
+		UndirectedGraph<Node, Edge> graph = new UndirectedSparseMultigraph<Node, Edge>();
 		ResultSet rs = dao.getInfo();
 		Hashtable<String, Node> nodes = new Hashtable<String, Node>();
 		ArrayList<Attribute> attributes = new ArrayList<Attribute>();

@@ -19,8 +19,8 @@ public class AlertOrder {
 	public ArrayList<Integer> select(int k, double C, DAO dao, ResultSet rs,
 			ArrayList<Attribute> attributes,
 			Hashtable<String, ArrayList<String>> conditions,
-			Hashtable<String, String> oriPath) {
-		Hashtable<String, String> path = (Hashtable<String, String>) oriPath.clone();
+			Hashtable<String, String> path) {
+		//Hashtable<String, String> path = (Hashtable<String, String>) oriPath.clone();
 		boolean loopFlag = true;
 		ArrayList<Integer> result = new ArrayList<Integer>();
 		int queryCount = 0;
@@ -53,9 +53,8 @@ public class AlertOrder {
 					probability = 1.0;
 				}
 				loopFlag = false;
-				//resultCount = 
-						dao.save2SampleDBAOver(rs, probability, rowCount);
-				path = (Hashtable<String, String>) oriPath.clone();
+				resultCount = dao.save2SampleDBAOver(rs, probability, rowCount);
+				//path = (Hashtable<String, String>) oriPath.clone();
 				//path.clear();
 			} else if (rowCount > k) {
 				// overflow
@@ -63,8 +62,8 @@ public class AlertOrder {
 			} else if (rowCount == 0) {
 				// underflow
 				System.out.println("Underflow");
-				path = (Hashtable<String, String>) oriPath.clone();
-				//path.clear();
+				//path = (Hashtable<String, String>) oriPath.clone();
+				path.clear();
 			}
 
 		} while (loopFlag);
