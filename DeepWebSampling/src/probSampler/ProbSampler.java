@@ -21,7 +21,7 @@ import entity.Node;
 
 public class ProbSampler {
 
-	private int sizeOfRequired = 1000;
+	private int sizeOfRequired = 10000;
 	private int k = 100;
 	private double C = 1.0 / 256.0;
 	private int s1 = 2000;
