@@ -11,8 +11,8 @@ public class Conn {
 			Class.forName("com.mysql.jdbc.Driver");
 
 			connection = DriverManager.getConnection(
-					"jdbc:mysql://localhost/", "rokeer",
-					"enjoylove");
+					"jdbc:mysql://localhost/", "root",
+					"");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

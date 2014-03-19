@@ -5,6 +5,7 @@ public class Node {
 	private final String value;
 	private int usedTime;
 	private double prob;
+	private int queryTime;
 	
 	public Node(String attribute, String value)
 	{
@@ -12,6 +13,7 @@ public class Node {
 		this.value = value;
 		this.usedTime = 0;
 		this.prob = 0.0;
+		this.queryTime = 0;
 	}
 	
 	public Node(String attribute, String value, int usedTime)
@@ -20,10 +22,15 @@ public class Node {
 		this.value = value;
 		this.usedTime = usedTime;
 		this.prob = 0.0;
+		this.queryTime = 0;
 	}
 	
 	public void addUsedTime() {
 		this.usedTime = this.usedTime + 1;
+	}
+	
+	public void addQueryTime() {
+		this.queryTime = this.queryTime + 1;
 	}
 	
 	
@@ -51,6 +58,14 @@ public class Node {
 
 	public void setProb(double prob) {
 		this.prob = prob;
+	}
+
+	public int getQueryTime() {
+		return queryTime;
+	}
+
+	public void setQueryTime(int queryTime) {
+		this.queryTime = queryTime;
 	}
 	
 	

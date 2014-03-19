@@ -227,8 +227,43 @@ public class DAO {
 		return rs;
 	}
 	
-	public ResultSet getProbPathCount (Hashtable<String, String> path) {
-		String sql = "select count(*) from " + database + "." + table + " where ";
+	public ResultSet getProbPathCountWithTowConditions (Hashtable<String, String> path, int mode) {
+		String sql = "";
+		if (mode == 0) {
+			sql = "select count(*) from " + database + "." + sampleTable + " where ";
+		} else {
+			sql = "select count(*) from " + database + "." + table + " where ";
+		}
+		try {
+			//t = connection.createStatement();
+			int count = 0;
+			for (String key : path.keySet()) {
+				if (count < 2) {
+					sql = sql + key + " = '" + path.get(key) + "' AND ";
+					count = count + 1;
+				}
+				
+			}
+			
+			
+			
+			sql = sql.substring(0, sql.length() - 5);
+
+			System.out.println("Statment: " + sql);
+			rs = t.executeQuery(sql);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return rs;
+	}
+	
+	public ResultSet getProbPathCount (Hashtable<String, String> path, int mode) {
+		String sql = "";
+		if (mode == 0) {
+			sql = "select count(*) from " + database + "." + sampleTable + " where ";
+		} else {
+			sql = "select count(*) from " + database + "." + table + " where ";
+		}
 		try {
 			//t = connection.createStatement();
 			for (String key : path.keySet()) {

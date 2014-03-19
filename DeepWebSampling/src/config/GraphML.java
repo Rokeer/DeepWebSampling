@@ -171,12 +171,16 @@ public class GraphML {
 		double edgeProb = 0.0;
 		//double pX = 1.0;
 		
+		/**
 		String sPath = "*";
 		for (String pathKey : path.keySet()) {
 			sPath = sPath + pathKey + " = " + path.get(pathKey) + ", ";
 		}
 		
+		
 		System.out.println(sPath.substring(0, sPath.length()-2));
+		**/
+		
 		for (String key : path.keySet()) {
 			if (flag) {
 				current = nodes.get(key + "*" + path.get(key));
@@ -205,5 +209,49 @@ public class GraphML {
 		return prob;
 	}
 	
+	
+	public double getProbOfSelectWithTwoConditions(UndirectedGraph<Node, Edge> graph,
+			Hashtable<String, Node> nodes, Hashtable<String, String> path) {
+		double prob = 0.0;
+		boolean flag = true;
+		Node current = null, next = null;
+		Edge edge = null;
+		double edgeProb = 0.0;
+		//double pX = 1.0;
+		
+		int count = 0;
+		
+		for (String key : path.keySet()) {
+			if (count < 2){
+				if (flag) {
+					current = nodes.get(key + "*" + path.get(key));
+					prob = current.getProb();
+					// System.out.println(key+"*"+path.get(key)+"*"+prob);
+					flag = false;
+				} else {
+					next = nodes.get(key + "*" + path.get(key));
+					// System.out.println(graph.findEdge(current, next).getProb());
+					edge = graph.findEdge(current, next);
+					if (edge != null){
+						edgeProb = (edge.getWeight()*1.0)/(current.getUsedTime()*1.0);
+					} else {
+						edgeProb = 0.0;
+					}
+					
+					prob = prob * edgeProb;
+					//pX = pX * next.getProb();
+					//prob = prob * graph.findEdge(current, next).getProb();
+					//System.out.println(next.getAttribute()+"*"+next.getValue()+"*"+current.getAttribute()+"*"+current.getValue()+"*"+graph.findEdge(current, next).getProb());
+					//current = next;
+					//prob = prob * next.getProb();
+				}
+				System.out.println(key+"*"+path.get(key)+"*"+prob);
+				count = count + 1;
+			}
+			
+		}
+		//prob = prob / pX;
+		return prob;
+	}
 	
 }
