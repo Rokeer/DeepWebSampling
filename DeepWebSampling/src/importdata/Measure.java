@@ -31,7 +31,7 @@ public class Measure {
 		sampleDatabases.add("rsdb");
 		sampleDatabases.add("rsdb1");
 		**/
-		sampleDatabases.add("psdb");
+		sampleDatabases.add("ahsdb");
 		DAO dao = new DAO("uscensus", "usdatanoid", "", "attrinfo");
 		ArrayList<Attribute> attributes = new ArrayList<Attribute>();
 		Hashtable<String, ArrayList<String>> conditions = new Hashtable<String, ArrayList<String>>();

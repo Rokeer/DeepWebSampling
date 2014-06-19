@@ -111,7 +111,14 @@ public class ProbSampler {
 		int probPathCount = 0;
 		
 		do {
-			estAllWithSelect(path);
+			int tempcount = 0;
+			for (int i = 0; i < 10 ; i++) {
+				estAllWithoutGraph();
+				tempcount = tempcount + estTotal;
+			}
+			tempcount = tempcount / 10;
+			System.out.println(tempcount);
+			
 			estAll (path); //est database total
 			path.clear();
 			candidatePaths.clear();
@@ -288,26 +295,81 @@ public class ProbSampler {
 	}
 	**/
 	
-	public void estAllWithSelect (Hashtable<String, String> path) {
-		rs = dao.getSample("*", "*");
-		long a = System.currentTimeMillis();
-		gml.getGraph(rs, nodes, graph, localDB);
-		long b = System.currentTimeMillis();
-		System.out.println(b-a);
-		//graph = gml.getGraph(rs, nodes, graph, localDB);
+	public void estAllWithoutGraph () {
+		// for testing, delete the codes below when final
+		path.clear();
+		while(true) {
+			rs = dao.randomSelect(attributes, conditions, path, k);
+			int rowCount = 0;
+			try {
+				rs.last();
+				rowCount = rs.getRow();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if (rowCount <= k && rowCount > 0) {
+				// valid query
+				rs = dao.getProbPathCount(path, 0);
+				int countInSample = 0;
+				try {
+					while (rs.next()) {
+						countInSample = rs.getInt(1);
+					}
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+				if (countInSample != 0) {
+					System.out.println("Valid query");
+					break;
+				} else {
+					path.clear();
+				}
+				
+			} else if (rowCount > k) {
+				// overflow
+				//System.out.println("Overflow");
+			} else if (rowCount == 0) {
+				// underflow
+				//System.out.println("Underflow");
+				path.clear();
+			}
+		}
+		rs = dao.getProbPathCount(path, 1);
+		int validCount = 0;
 		double probOfSelect = 0.0;
-		int probPathCount = 0;
-		probOfSelect = gml.getProbOfSelectWithTwoConditions(graph, nodes, path);
-		rs = dao.getProbPathCountWithTowConditions(path, 0);
+		int sampleCount = 0;
+		int allSampleCount = 0;
 		try {
 			while (rs.next()) {
-				probPathCount = rs.getInt(1);
+				validCount = rs.getInt(1);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		estTotal = (int) (probPathCount / probOfSelect);
-		System.out.println("Sample count = " + probPathCount + ", estTotal = " + estTotal);
+		
+		rs = dao.getProbPathCount(path, 0);
+		try {
+			while (rs.next()) {
+				sampleCount = rs.getInt(1);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		rs = dao.getAHCount("*", "*");
+		try {
+			while (rs.next()) {
+				allSampleCount = rs.getInt(1);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		probOfSelect = (sampleCount * 1.0) / (allSampleCount * 1.0);
+		
+		estTotal = (int) (validCount / probOfSelect);
+		System.out.println("valid count = " + validCount + ", sampleCount = "+sampleCount+", allSampleCount = "+allSampleCount+",  estTotal = " + estTotal);
 	}
 	
 	public void estAll (Hashtable<String, String> path) {
