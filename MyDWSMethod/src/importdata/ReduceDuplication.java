@@ -3,7 +3,7 @@ package importdata;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 
 import dao.DAO;
 import entity.Attribute;
@@ -17,7 +17,7 @@ public class ReduceDuplication {
 		// TODO Auto-generated method stub
 		DAO dao = new DAO("uscensus", "usdata", "", "attrinfo");
 		//ResultSet rs = dao.getCount("*", "*");
-		Hashtable<Integer, String> ht = new Hashtable<Integer, String>();
+		HashMap<Integer, String> ht = new HashMap<Integer, String>();
 		
 		ResultSet rs = dao.getAttributes();
 		ArrayList<Attribute> attributes = new ArrayList<Attribute>();

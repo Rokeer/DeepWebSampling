@@ -2,11 +2,15 @@ package dao;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Random;
 
 import config.Conn;
+import config.Util;
 import entity.Attribute;
 
 public class DAO {
@@ -156,6 +160,142 @@ public class DAO {
 			e.printStackTrace();
 		}
 		return true;
+	}
+	
+	public ResultSet getInfo() {
+		//ResultSet rs = null;
+		//Statement t;
+
+		try {
+			//t = connection.createStatement();
+			rs = t.executeQuery("select * from " + database + "." + infoTable);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return rs;
+	}
+	
+	public void createSampleDB(ArrayList<Attribute> al) {
+		Statement t;
+		String stat = "create table " + database + "." + sampleTable + " (";
+		try {
+			t = connection.createStatement();
+			t.execute("drop table IF EXISTS " + database + "." + sampleTable);
+			for (int i = 0; i < al.size(); i++) {
+				stat = stat + al.get(i).getName() + " char(45), ";
+			}
+			stat = stat.substring(0, stat.length() - 2) + ")";
+			//stat = stat.substring(0, stat.length() - 2);
+			//stat = stat + ", UNIQUE KEY test1 (";
+			/**
+			for (int m = 0; m < al.size() / 16; m++) {
+				stat = stat + ", UNIQUE KEY test" + m + " (";
+				for (int i = 0; i < 16; i++) {
+					stat = stat + al.get(i + 16 * m).getName() + ", ";
+				}
+				stat = stat.substring(0, stat.length() - 2)  + ")";
+			}
+			stat = stat + ")";
+			**/
+			//stat = stat.substring(0, stat.length() - 2) + "))";
+			t.execute(stat);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		stat = "create table " + database + ".tmpTable (";
+		try {
+			t = connection.createStatement();
+			t.execute("drop table IF EXISTS " + database + ".tmpTable");
+			for (int i = 0; i < al.size(); i++) {
+				stat = stat + al.get(i).getName() + " char(45), ";
+			}
+			stat = stat.substring(0, stat.length() - 2) + ")";
+			t.execute(stat);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public ResultSet randomSelect(ArrayList<Attribute> attributes,
+			HashMap<String, ArrayList<String>> conditions,
+			HashMap<String, String> path, int k) {
+		//ResultSet rs = null;
+		// Statement t;
+		Random random = new Random();
+		int attCount = 0;
+		int valueCount = 0;
+		String attribute = "";
+		String value = "";
+		String sql = "select * from " + database + "." + table + " where ";
+		//String sql = "select * from " + database + "." + sampleTable + " where ";
+		try {
+			// t = connection.createStatement();
+			do {
+				attCount = Math.abs(random.nextInt() % attributes.size());
+			} while (path.get(attributes.get(attCount).getName()) != null);
+			attribute = attributes.get(attCount).getName();
+			valueCount = Math.abs(random.nextInt()
+					% conditions.get(attribute).size());
+			value = conditions.get(attribute).get(valueCount);
+			path.put(attribute, value);
+
+			/**
+			for (String key : path.keySet()) {
+				sql = sql + key + " = '" + path.get(key) + "' AND ";
+			}
+			**/
+
+			sql = Util.ConstuctSelect(path) + " LIMIT " + (k + 1);
+			//sql = sql.substring(0, sql.length() - 5) + " LIMIT " + (k + 1);
+			
+			//System.out.println("Statment: " + sql);
+			rs = t.executeQuery(sql);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return rs;
+	}
+	
+	public int save2SampleDBRandom(ResultSet rs, double probability, int rowCount) {
+		//Statement t;
+		int result = 0;
+		String stat = "";
+		//boolean flag = true;
+		try {
+			ResultSetMetaData rsmd = rs.getMetaData();
+			int columnCount = rsmd.getColumnCount();
+			rs.beforeFirst();
+			
+			while (rs.next()) {
+				stat = "";
+				t = connection.createStatement();
+				for (int i = 0; i < columnCount; i++) {
+					stat = stat + "'" + rs.getString(i + 1) + "',";
+				}
+				// System.out.println(stat);
+				if (probability == 1.0) {
+					t.execute("insert into " + database + "." + sampleTable
+							+ " values ("
+							+ stat.substring(0, stat.length() - 1) + ")");
+					result = result + 1;
+					//flag = false;
+				} else if (Util.ToDoOrNotToDo(probability)) {
+					t.execute("insert into " + database + "." + sampleTable
+							+ " values ("
+							+ stat.substring(0, stat.length() - 1) + ")");
+					result = result + 1;
+					//flag = false;
+				}
+
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
 	}
 	
 	public void close() {
