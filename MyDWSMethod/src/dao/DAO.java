@@ -219,38 +219,11 @@ public class DAO {
 		}
 	}
 	
-	public ResultSet randomSelect(ArrayList<Attribute> attributes,
-			HashMap<String, ArrayList<String>> conditions,
-			HashMap<String, String> path, int k) {
-		//ResultSet rs = null;
-		// Statement t;
-		Random random = new Random();
-		int attCount = 0;
-		int valueCount = 0;
-		String attribute = "";
-		String value = "";
+	public ResultSet doSelect(HashMap<String, String> path, int k) {
 		String sql = "select * from " + database + "." + table + " where ";
 		//String sql = "select * from " + database + "." + sampleTable + " where ";
 		try {
-			// t = connection.createStatement();
-			do {
-				attCount = Math.abs(random.nextInt() % attributes.size());
-			} while (path.get(attributes.get(attCount).getName()) != null);
-			attribute = attributes.get(attCount).getName();
-			valueCount = Math.abs(random.nextInt()
-					% conditions.get(attribute).size());
-			value = conditions.get(attribute).get(valueCount);
-			path.put(attribute, value);
-
-			/**
-			for (String key : path.keySet()) {
-				sql = sql + key + " = '" + path.get(key) + "' AND ";
-			}
-			**/
-
-			sql = Util.ConstuctSelect(path) + " LIMIT " + (k + 1);
-			//sql = sql.substring(0, sql.length() - 5) + " LIMIT " + (k + 1);
-			
+			sql = sql + Util.ConstuctSelect(path) + " LIMIT " + (k + 1);
 			//System.out.println("Statment: " + sql);
 			rs = t.executeQuery(sql);
 		} catch (Exception e) {
@@ -260,7 +233,7 @@ public class DAO {
 		return rs;
 	}
 	
-	public int save2SampleDBRandom(ResultSet rs, double probability, int rowCount) {
+	public int save2SampleDBRandom(ResultSet rs, double probability) {
 		//Statement t;
 		int result = 0;
 		String stat = "";
