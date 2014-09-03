@@ -28,6 +28,7 @@ public class ProbSampler {
 	/**
 	 * other var will be used
 	 */
+	public static int save = 0;
 	private int sampleSize = 0;
 	private DAO dao = new DAO("uscensus", "usdatanoid", "ahsdb", "attrinfo");
 	private ResultSet rs = dao.getInfo();
@@ -80,8 +81,9 @@ public class ProbSampler {
 		while (sampleSize < requiredSize) {
 			ArrayList<Attribute> cloneAttributes = (ArrayList<Attribute>) attributes.clone();
 			coolSelect("", cloneAttributes);
+			System.out.println(queryCount);
 		}
-		System.out.println(queryCount);
+		System.out.println("QueryCount = "+queryCount+", Save = " + save);
 	}
 	
 	private void coolSelect (String startPoint, ArrayList<Attribute> cloneAttributes) {

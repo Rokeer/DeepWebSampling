@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Random;
+
+import probSampler.ProbSampler;
 import edu.uci.ics.jung.graph.UndirectedGraph;
 import edu.uci.ics.jung.graph.UndirectedSparseMultigraph;
 import entity.Attribute;
@@ -52,6 +54,7 @@ public class Util {
 			if (flag) {
 				flag = false;
 			} else {
+				ProbSampler.save = ProbSampler.save + 1;
 				return true;
 			}
 		}
