@@ -20,7 +20,7 @@ public class ProbSampler {
 	 */
 	private int requiredSize = 10000;
 	private int s1 = 2000;
-	private int k = 100;
+	private int k = 20;
 	private double C = 1.0 / 256.0;
 	private double smoothRatio = 0.2;
 	private double alpha = 0.2;

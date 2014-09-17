@@ -24,7 +24,7 @@ public class AlertHybrid {
 		int k = 100;
 		double C = 1.0/256.0;
 		int s1 = 2000;
-		int cs = 5;
+		int cs = 20;
 		DAO dao = new DAO("uscensus", "usdatanoid", "ahsdb", "attrinfo");
 		ResultSet rs = dao.getInfo();
 		Util u = new Util();
