@@ -1,5 +1,7 @@
 package probSampler;
 
+import importdata.Measure;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -20,10 +22,11 @@ public class ProbSampler {
 	 */
 	private int requiredSize = 10000;
 	private int s1 = 2000;
-	private int k = 20;
+	private int k = 100;
 	private double C = 1.0 / 256.0;
 	private double smoothRatio = 0.2;
 	private double alpha = 0.2;
+	private int steps = 1;
 	
 	/**
 	 * other var will be used
@@ -41,8 +44,10 @@ public class ProbSampler {
 	private ArrayList<HashMap<String, String>> underQueries = new ArrayList<HashMap<String, String>>();
 	private UndirectedGraph<Node, Edge> graph;
 	private HashMap<String, Node> nodes = new HashMap<String, Node>();
+	private HashMap<Integer, String> overQueries = new HashMap<Integer, String>();
 	
-	public ProbSampler() {
+	public ProbSampler(String sampleDB) {
+		this.dao = new DAO("uscensus", "usdatanoid", sampleDB, "attrinfo");
 		try {
 			while (rs.next()) {
 
@@ -80,26 +85,34 @@ public class ProbSampler {
 		// real deal damn it.
 		while (sampleSize < requiredSize) {
 			ArrayList<Attribute> cloneAttributes = (ArrayList<Attribute>) attributes.clone();
-			coolSelect("", cloneAttributes);
+			coolSelect("", cloneAttributes, steps);
 			System.out.println(queryCount);
 		}
 		System.out.println("QueryCount = "+queryCount+", Save = " + save);
+		dao.save2result(queryCount, save, Measure.getMeasure(sampleDB));
 	}
 	
-	private void coolSelect (String startPoint, ArrayList<Attribute> cloneAttributes) {
+	private void coolSelect (String startPoint, ArrayList<Attribute> cloneAttributes, int steps) {
 		String av = "";
 		int resultCount = 0;
-		if (startPoint.equals("")) {
-			// select a start point
-			av = Util.getNewAttributeValue(cloneAttributes, path, "", conditions,
-					graph, nodes, smoothRatio, alpha, underQueries);
-			startPoint = av.split(",")[0];
-			
-		} else {
-			av = Util.getNewAttributeValue(cloneAttributes, path, startPoint, conditions,
-					graph, nodes, smoothRatio, alpha, underQueries);
+		ArrayList<String> avs = new ArrayList<String>();
+		for(int i = 0; i < steps; i++) {
+			if (path.size() == 0){
+			//if (startPoint.equals("")) {
+				// select a start point
+				av = Util.getNewAttributeValue(cloneAttributes, path, "", conditions,
+						graph, nodes, smoothRatio, alpha, underQueries);
+				startPoint = av.split(",")[0];
+				overQueries.clear();
+			} else {
+				av = Util.getNewAttributeValue(cloneAttributes, path, startPoint, conditions,
+						graph, nodes, smoothRatio, alpha, underQueries);
+			}
+			path.put(av.split(",")[0], av.split(",")[1]);
+			avs.add(av.split(",")[0]);
 		}
-		path.put(av.split(",")[0], av.split(",")[1]);
+		
+		/**
 		int i = 0;
 		for (i = 0; i < cloneAttributes.size(); i++) {
 			if (cloneAttributes.get(i).getName().equals(av.split(",")[0])) {
@@ -107,7 +120,7 @@ public class ProbSampler {
 				break;
 			}
 		}
-
+		**/
 		
 		//do select
 		rs = dao.doSelect(path, k);
@@ -139,14 +152,27 @@ public class ProbSampler {
 		} else if (rowCount > k) {
 			// overflow
 			System.out.println("Overflow");
-			coolSelect(startPoint, cloneAttributes);
+			if (Util.haveOverlap(cloneAttributes, overQueries, rs, k)) {
+				if (steps > 1){
+					coolSelect(startPoint, cloneAttributes, steps - 1);
+				} else {
+					coolSelect(startPoint, cloneAttributes, steps);
+				}
+				
+			} else {
+				coolSelect(startPoint, cloneAttributes, steps);
+			}
+			
 		} else if (rowCount == 0) {
 			// underflow
 			underQueries.add((HashMap<String, String>) path.clone());
 			System.out.println("Underflow");
 			//path = (Hashtable<String, String>) oriPath.clone();
-			path.remove(av.split(",")[0]);
-			coolSelect(startPoint, cloneAttributes);
+			for (int i = 0; i < avs.size(); i++) {
+				path.remove(avs.get(i));
+			}
+			//path.remove(av.split(",")[0]);
+			coolSelect(startPoint, cloneAttributes, steps);
 		}
 		
 	}

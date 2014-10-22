@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Random;
 
@@ -362,6 +363,83 @@ public class Util {
         	}
         }
         return null;
+	}
+	
+	public static boolean haveOverlap (ArrayList<Attribute> attributes, 
+			HashMap<Integer, String> overQueries, ResultSet rs, int k) {
+		String value = "";
+		int v = 0;
+		if (overQueries.size() == 0) {
+			try {
+				rs.beforeFirst();
+				for (int i = 0; i < k; i++){
+					rs.next();
+					value = "";
+					for (int j = 1; j < attributes.size(); j++) {
+			            value = value + rs.getString(attributes.get(j).getName()) + "*";
+			        }
+					v = value.hashCode();
+					//System.out.println(v);
+					overQueries.put(v, "1");
+				}
+				
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return false;
+		} else {
+			try {
+				rs.beforeFirst();
+				for(int i = 0; i < k; i++) {
+					rs.next();
+					value = "";
+					for (int j = 1; j < attributes.size(); j++) {
+			            value = value + rs.getString(attributes.get(j).getName()) + "*";
+			        }
+					v = value.hashCode();
+					//System.out.println(v);
+					if(!overQueries.containsKey(v)){
+						//System.out.println("delete something lol");
+						return true;
+					}
+				}
+				
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return false;
+	}
+	
+	public static double calculateKL(ArrayList<Attribute> attributes,
+			Hashtable<String, ArrayList<String>> conditions,
+			Hashtable<String, Double> oriTable,
+			Hashtable<String, Double> samTable) {
+		double result = 0.0;
+		String tmpAttribute = "";
+		String tmpValue = "";
+		ArrayList<String> tmpList = new ArrayList<String>();
+		for (int i = 0; i < attributes.size(); i++) {
+			tmpAttribute = attributes.get(i).getName();
+
+			tmpList = conditions.get(tmpAttribute);
+			for (int j = 0; j < tmpList.size(); j++) {
+				tmpValue = tmpList.get(j);
+				if (samTable.get(tmpAttribute + "*" + tmpValue) != 0.0) {
+					result = result
+							+ samTable.get(tmpAttribute + "*" + tmpValue)
+							* Math.log(samTable.get(tmpAttribute + "*" + tmpValue)
+									/ oriTable.get(tmpAttribute + "*" + tmpValue));
+				}
+				
+				//System.out.println(samTable.get(tmpAttribute + "*" + tmpValue));
+				//System.out.println(result);
+			}
+		}
+
+		return result;
 	}
 	
 }

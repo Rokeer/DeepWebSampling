@@ -281,4 +281,31 @@ public class DAO {
 		}
 		
 	}
+	
+	public ResultSet getCountFromSample(String attribute, String value, String table) {
+		try {
+			//t = connection.createStatement();
+			if (attribute.equals("*")) {
+				rs = t.executeQuery("select count(*) from " + database + "." + table);
+			} else {
+				rs = t.executeQuery("select count(*) from " + database + "." + table + " where " + attribute + " = '" + value + "'");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return rs;
+	}
+	
+	public boolean save2result(int queries, int prevent, double measure) {
+		Statement t;
+		try {
+			
+			t = connection.createStatement();
+			t.execute("insert into " + database + "." + "result" + " values ('" + sampleTable + "', '" + queries + "', '" + prevent +"', '"+measure+"')");
+			//t.executeQuery("select count(*) from " + database + "." + sampleTable);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return true;
+	} 
 }
