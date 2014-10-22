@@ -308,7 +308,7 @@ public class Util {
 	}
 	
 	public static String getNewAttributeValue(ArrayList<Attribute> attributes, HashMap<String, String> path,
-			String startPoint, HashMap<String, ArrayList<String>> conditions,
+			HashMap<String, ArrayList<String>> conditions,
 			UndirectedGraph<Node, Edge> graph,
 			HashMap<String, Node> nodes,
 			double smoothRatio, double alpha,
@@ -326,6 +326,12 @@ public class Util {
 					clonePath = (HashMap<String, String>) path.clone();
 					clonePath.put(attribute.getName(), tmpConditions.get(j));
 					node = nodes.get(attribute.getName()+","+tmpConditions.get(j));
+					if (!Util.isUnderflow(clonePath, underQueries)){
+						slot.put(attribute.getName()+","+tmpConditions.get(j), 
+								getProbOfSelectWithStartPoint(graph, nodes, clonePath, 
+										smoothRatio, attribute.getName())*Math.pow(alpha, node.getQueryTime()));
+					}
+					/**
 					if(startPoint.equals("")){
 						slot.put(attribute.getName()+","+tmpConditions.get(j), 
 								getProbOfSelectWithStartPoint(graph, nodes, clonePath, 
@@ -337,7 +343,7 @@ public class Util {
 											smoothRatio, startPoint)*Math.pow(alpha, node.getQueryTime()));
 						}
 					}
-					
+					**/
 					
 				}
 			}

@@ -85,14 +85,14 @@ public class ProbSampler {
 		// real deal damn it.
 		while (sampleSize < requiredSize) {
 			ArrayList<Attribute> cloneAttributes = (ArrayList<Attribute>) attributes.clone();
-			coolSelect("", cloneAttributes, steps);
+			coolSelect(cloneAttributes, steps);
 			System.out.println(queryCount);
 		}
 		System.out.println("QueryCount = "+queryCount+", Save = " + save);
 		dao.save2result(queryCount, save, Measure.getMeasure(sampleDB));
 	}
 	
-	private void coolSelect (String startPoint, ArrayList<Attribute> cloneAttributes, int steps) {
+	private void coolSelect (ArrayList<Attribute> cloneAttributes, int steps) {
 		String av = "";
 		int resultCount = 0;
 		ArrayList<String> avs = new ArrayList<String>();
@@ -100,12 +100,12 @@ public class ProbSampler {
 			if (path.size() == 0){
 			//if (startPoint.equals("")) {
 				// select a start point
-				av = Util.getNewAttributeValue(cloneAttributes, path, "", conditions,
+				av = Util.getNewAttributeValue(cloneAttributes, path, conditions,
 						graph, nodes, smoothRatio, alpha, underQueries);
-				startPoint = av.split(",")[0];
+				//startPoint = av.split(",")[0];
 				overQueries.clear();
 			} else {
-				av = Util.getNewAttributeValue(cloneAttributes, path, startPoint, conditions,
+				av = Util.getNewAttributeValue(cloneAttributes, path, conditions,
 						graph, nodes, smoothRatio, alpha, underQueries);
 			}
 			path.put(av.split(",")[0], av.split(",")[1]);
@@ -152,16 +152,16 @@ public class ProbSampler {
 		} else if (rowCount > k) {
 			// overflow
 			System.out.println("Overflow");
-			if (Util.haveOverlap(cloneAttributes, overQueries, rs, k)) {
-				if (steps > 1){
-					coolSelect(startPoint, cloneAttributes, steps - 1);
-				} else {
-					coolSelect(startPoint, cloneAttributes, steps);
-				}
+			//if (Util.haveOverlap(cloneAttributes, overQueries, rs, k)) {
+			//	if (steps > 1){
+			//		coolSelect(cloneAttributes, steps - 1);
+			//	} else {
+			//		coolSelect(cloneAttributes, steps);
+			//	}
 				
-			} else {
-				coolSelect(startPoint, cloneAttributes, steps);
-			}
+			//} else {
+				coolSelect(cloneAttributes, steps);
+			//}
 			
 		} else if (rowCount == 0) {
 			// underflow
@@ -172,7 +172,7 @@ public class ProbSampler {
 				path.remove(avs.get(i));
 			}
 			//path.remove(av.split(",")[0]);
-			coolSelect(startPoint, cloneAttributes, steps);
+			coolSelect(cloneAttributes, steps);
 		}
 		
 	}
