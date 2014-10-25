@@ -47,6 +47,35 @@ public class DAO {
 		}
 	}
 	
+	public Boolean deleteItems(ArrayList<String> sql) {
+		// Statement t;
+		StringBuffer sSQL = new StringBuffer();
+		sSQL.append("DELETE FROM uscensus.usdata WHERE ");
+		try {
+			// t = connection.createStatement();
+			for (int i = 0; i < sql.size(); i++) {
+				sSQL.append("caseid = '");
+				sSQL.append(sql.get(i));
+				sSQL.append("' or ");
+				//t.addBatch(sql.get(i));
+			}
+			//t.executeBatch();
+			//sSQL.substring(0, sSQL.length()-4);
+			for(int i = 0; i < 4; i++){
+				sSQL.deleteCharAt(sSQL.length()-1);
+			}
+			//sSQL.deleteCharAt(sSQL.length()-1);
+			//System.out.println(sSQL.toString());
+			System.out.println(sSQL.toString());
+			t.execute(sSQL.toString());
+			
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
 	public Boolean insertItem(ArrayList<String> sql) {
 		// Statement t;
 		StringBuffer sSQL = new StringBuffer();

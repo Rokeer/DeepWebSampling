@@ -15,7 +15,8 @@ public class ImportData {
 		// TODO Auto-generated method stub
 		try {
 			FileReader read = new FileReader(
-					"/Users/Rokeer/Documents/Works/data/USCensus1990data.txt");
+			//		"/Users/Rokeer/Documents/Works/data/USCensus1990data.txt");
+					"D:\\data\\USCensus1990data.txt");
 			@SuppressWarnings("resource")
 			BufferedReader br = new BufferedReader(read);
 			String row;

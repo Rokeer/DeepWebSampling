@@ -18,7 +18,7 @@ public class ReduceDuplication {
 		DAO dao = new DAO("uscensus", "usdata", "", "attrinfo");
 		//ResultSet rs = dao.getCount("*", "*");
 		HashMap<Integer, String> ht = new HashMap<Integer, String>();
-		
+		ArrayList<String> sqls = new ArrayList<String>();
 		ResultSet rs = dao.getAttributes();
 		ArrayList<Attribute> attributes = new ArrayList<Attribute>();
 		try {
@@ -40,6 +40,7 @@ public class ReduceDuplication {
 			allCount = rs.getInt(1) + 10000;
 		System.out.println(allCount);
 		for(int i = 0; i < allCount; i = i + 10000) {
+			sqls.clear();
 			count = 0;
 			rs = dao.selectIItems(i);
 			System.out.println("Select Done!");
@@ -54,6 +55,7 @@ public class ReduceDuplication {
 				if(ht.containsKey(v)){
 					//System.out.println("delete something lol");
 					rs.deleteRow();
+					//sqls.add(rs.getString(1));
 					count = count + 1;
 				} else {
 					ht.put(v, "1");
@@ -62,6 +64,10 @@ public class ReduceDuplication {
 			System.out.println("delete " + count + " itmes");
 			allCount = allCount - count;
 			i = i - count;
+			//if(sqls.size()>0){
+			//	dao.deleteItems(sqls);
+			//}
+			
 			dao.close();
 		}
 		
