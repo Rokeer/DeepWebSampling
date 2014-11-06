@@ -3,6 +3,7 @@ package alertHybrid;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 
 import tree.EdgeData;
@@ -17,6 +18,8 @@ public class AlertHybrid {
 	static int queryCount = 0;
 	static int queryByAH = 0;
 	static int hey = 0;
+	static Hashtable<Hashtable<String, String>, Integer> canBeDeleteValidQueries = new Hashtable<Hashtable<String, String>, Integer>();
+
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -125,6 +128,12 @@ public class AlertHybrid {
 		System.out.println("Query: " + queryCount);
 		System.out.println("Query2: " + queryByAH);
 		System.out.println(hey);
+		double length = 0;
+		for (Hashtable<String, String> patha : canBeDeleteValidQueries.keySet()) {
+			length = length + patha.size();
+		}
+		length = length / (canBeDeleteValidQueries.size() * 1.0);
+		System.out.println("Length = " + length);
 	}
 	
 	public static int HybridSAMP(int s,
@@ -292,6 +301,8 @@ public class AlertHybrid {
 			return 1;
 		} else {
 			System.out.println("Valid query");
+
+			canBeDeleteValidQueries.put((Hashtable <String, String>) path.clone(), rowCount);
 			dao.countDecisionTreeSelect(path);
 			return 1;
 		}

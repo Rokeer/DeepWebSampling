@@ -12,7 +12,7 @@ public class Conn {
 
 			connection = DriverManager.getConnection(
 					"jdbc:mysql://localhost/", "root",
-					"");
+					"root");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

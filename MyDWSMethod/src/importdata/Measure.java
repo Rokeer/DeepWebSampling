@@ -77,7 +77,7 @@ public class Measure {
 				try {
 					while (rs.next()) {
 						oriTable.put(tmpAttribute + "*" + tmpValue, rs.getDouble(1)/allCount);
-						System.out.println("count: " + i + " " + tmpAttribute + " = " + tmpValue + " p = " + rs.getDouble(1));
+						//System.out.println("count: " + i + " " + tmpAttribute + " = " + tmpValue + " p = " + rs.getDouble(1));
 						
 					}
 				} catch (SQLException e) {

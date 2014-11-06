@@ -71,11 +71,11 @@ public class RandomApproach {
 				path.clear();
 			} else if (rowCount > k) {
 				// overflow
-				System.out.println("Overflow");
+				//System.out.println("Overflow");
 			} else if (rowCount == 0) {
 				// underflow
 				underQueries.add((HashMap<String, String>) path.clone());
-				System.out.println("Underflow");
+				//System.out.println("Underflow");
 				//path = (Hashtable<String, String>) oriPath.clone();
 				path.clear();
 			}

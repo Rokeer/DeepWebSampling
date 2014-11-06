@@ -253,8 +253,24 @@ public class Util {
 				edge = graph.findEdge(current, next);
 				
 				// check if the edge prob need to be smoothed
+				if (edge.getWeight() == 0) {
+					int count = 0;
+					for (String nodeKey : nodes.keySet()) {
+						if (nodeKey.startsWith(key)) {
+							Node tmpNode = nodes.get(nodeKey);
+							Edge tmpEdge = graph.findEdge(current, tmpNode);
+							if (tmpEdge.getWeight() == 0) {
+								count++;
+							}
+						}
+					}
+					edgeProb = (1.0 - smoothRatio) / (count * 1.0);
+				} else if (edge.getNeedSmooth()) {
+					edgeProb = (edge.getWeight()*1.0)/(current.getCount()*1.0) * smoothRatio;
+				} else {
+					edgeProb = (edge.getWeight()*1.0)/(current.getCount()*1.0);
+				}
 				
-				edgeProb = (edge.getWeight()*1.0)/(current.getCount()*1.0) * smoothRatio;
 				
 				prob = prob * edgeProb;
 			}
@@ -349,13 +365,19 @@ public class Util {
 			}
 			
 		}
+		
+		/**
+		if(slot == null || slot.size() == 0)  
+            return "1";  
+        **/
 		String result = chanceSelect(slot);
 		return result;
+		
 	}
 	
 	public static String chanceSelect(HashMap<String, Double> keyChanceMap) {
 		if(keyChanceMap == null || keyChanceMap.size() == 0)  
-            return null;  
+            return "1";  
 		double sum = 0.0;
 		for(String key : keyChanceMap.keySet()) {
 			sum = sum + keyChanceMap.get(key);
@@ -368,7 +390,7 @@ public class Util {
         		return key;
         	}
         }
-        return null;
+        return "2";
 	}
 	
 	public static boolean haveOverlap (ArrayList<Attribute> attributes, 
@@ -448,4 +470,66 @@ public class Util {
 		return result;
 	}
 	
+	
+	public static ArrayList<String> getGaussModel(HashMap<HashMap<String, String>, Integer> validQueries,
+			UndirectedGraph<Node, Edge> graph,
+			HashMap<String, Node> nodes, double smoothRatio) {
+		HashMap<HashMap<String, String>, Double> tmpValidQueries = new HashMap<HashMap<String, String>, Double>();
+		double countAvg = 0.0;
+		double probAvg = 0.0;
+		for (HashMap<String, String> path : validQueries.keySet()) {
+			//System.out.println(path.size());
+			countAvg = countAvg + Math.log10((path.size() * 1.0));
+			tmpValidQueries.put(path, getProbOfSelect(graph, nodes, path, smoothRatio));
+			probAvg = probAvg + Math.log10(tmpValidQueries.get(path));
+			//probOfSelect = getProbOfSelect(graph, nodes, path, smoothRatio);
+			//probPathCount = validQueries.get(path);
+			//result = result + ((probPathCount * 1.0) / probOfSelect);
+		}
+		countAvg = countAvg / (validQueries.size() * 1.0);
+		probAvg = probAvg / (validQueries.size() * 1.0);
+		
+		double countVar = 0.0;
+		double probVar = 0.0;
+		
+		for (HashMap<String, String> path : validQueries.keySet()) {
+			//System.out.println(tmpValidQueries.get(path));
+			countVar = countVar + Math.pow(Math.log10((path.size() * 1.0)) - countAvg, 2);
+			probVar = probVar + Math.pow(Math.log10(tmpValidQueries.get(path)) - probAvg, 2);
+		}
+		countVar = countVar / (validQueries.size() * 1.0);
+		probVar = probVar / (validQueries.size() * 1.0);
+		
+		ArrayList<String> result = new ArrayList<String>();
+		result.add(countAvg + "," + countVar);
+		result.add(probAvg + "," + probVar);
+		
+		return result;
+	}
+	
+	public static double applyGaussModel(HashMap<String, String> path,
+			UndirectedGraph<Node, Edge> graph,
+			HashMap<String, Node> nodes, double smoothRatio,
+			ArrayList<String> gaussModel) {
+		double result = 1.0;
+		double countAvg = Double.parseDouble(gaussModel.get(0).split(",")[0]);
+		double probAvg = Double.parseDouble(gaussModel.get(1).split(",")[0]);
+		double countVar = Double.parseDouble(gaussModel.get(0).split(",")[1]);
+		double probVar = Double.parseDouble(gaussModel.get(1).split(",")[1]);
+		
+		double a2 = Math.sqrt(2.0 * Math.PI * countVar);
+		double b2 = Math.pow(Math.E, -1.0 * (Math.pow(path.size() * 1.0 - countAvg, 2) / (2.0 * countVar)));
+		double c2 = -1.0 * (Math.pow(path.size() * 1.0 - countAvg, 2) / (2.0 * countVar));
+
+		
+		double a = Math.sqrt(2.0 * Math.PI * probVar);
+		double b = Math.pow(Math.E, -1.0 * (Math.pow(getProbOfSelect(graph, nodes, path, smoothRatio) - probAvg, 2) / (2.0 * probVar)));
+		double c = -1.0 * (Math.pow(getProbOfSelect(graph, nodes, path, smoothRatio) - probAvg, 2) / (2.0 * probVar));
+		double d = (1.0 / Math.sqrt(2.0 * Math.PI * probVar)) * Math.pow(Math.E, -1.0 * (Math.pow(getProbOfSelect(graph, nodes, path, smoothRatio) - probAvg, 2) / (2.0 * probVar)));
+		double e = getProbOfSelect(graph, nodes, path, smoothRatio);
+		result = result * (1.0 / Math.sqrt(2.0 * Math.PI * countVar)) * Math.pow(Math.E, -1.0 * (Math.pow(Math.log10(path.size() * 1.0) - countAvg, 2) / (2.0 * countVar)));
+		result = result * (1.0 / Math.sqrt(2.0 * Math.PI * probVar)) * Math.pow(Math.E, -1.0 * (Math.pow(Math.log10(getProbOfSelect(graph, nodes, path, smoothRatio)) - probAvg, 2) / (2.0 * probVar)));
+		
+		return result;
+	}
 }
