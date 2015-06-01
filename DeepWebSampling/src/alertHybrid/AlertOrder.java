@@ -15,6 +15,7 @@ public class AlertOrder {
 		
 	}
 	
+	
 	@SuppressWarnings("unchecked")
 	public ArrayList<Integer> select(int k, double C, DAO dao, ResultSet rs,
 			ArrayList<Attribute> attributes,
